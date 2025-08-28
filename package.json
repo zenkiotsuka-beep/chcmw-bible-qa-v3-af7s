@@ -1,7 +1,0 @@
-{
-  "name": "chcmw-bible-qa-v3",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": { "start": "node api/qa.js" },
-  "dependencies": { "openai": "^4.0.0" }
-}
