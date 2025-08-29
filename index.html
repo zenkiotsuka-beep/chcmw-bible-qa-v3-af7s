@@ -1,36 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CHCMW Bible Q&A v3 - API Test</title>
-</head>
-<body style="font-family: Arial, sans-serif; margin: 2em;">
-  <h1>CHCMW Bible Q&A v3 Tester</h1>
-  <p>Enter your question in English or Japanese:</p>
-  <textarea id="question" rows="5" cols="60" placeholder="Type here..."></textarea><br><br>
-  <button onclick="askQuestion()">Ask</button>
-  <h3>Response:</h3>
-  <div id="response" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 1em; width: 80%;"></div>
-
-  <script>
-    async function askQuestion() {
-      const question = document.getElementById("question").value;
-      const responseDiv = document.getElementById("response");
-      responseDiv.innerText = "Loading...";
-
-      try {
-        const res = await fetch('/api/qa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question })
-        });
-        const data = await res.json();
-        responseDiv.innerText = data.answer;
-      } catch (err) {
-        responseDiv.innerText = "Error: " + err.message;
-      }
-    }
-  </script>
-</body>
+<html>
+  <head><title>CHCMW Bible Q&A</title></head>
+  <body>
+    <h1>Welcome to CHCMW Bible Q&A</h1>
+    <p>This page is for deployment testing.</p>
+  </body>
 </html>
