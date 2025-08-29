@@ -2,16 +2,6 @@
   "name": "chcmw-bible-qa-v3",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "next": "14.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "openai": "^4.0.0"
-  }
+  "scripts": { "start": "node api/qa.js" },
+  "dependencies": { "openai": "^4.0.0" }
 }

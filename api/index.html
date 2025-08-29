@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>CHCMW Bible Q&A v3 Tester</title></head>
+<body style="font-family: sans-serif; margin: 2em;">
+  <h1>Ask Your Bible Question (English or Japanese)</h1>
+  <textarea id="question" rows="5" cols="60" placeholder="Type here..."></textarea><br><br>
+  <button onclick="ask()">Ask</button>
+  <pre id="response" style="margin-top: 2em; background: #f9f9f9; padding: 1em;"></pre>
+  <script>
+    async function ask() {
+      const question = document.getElementById("question").value;
+      const res = await fetch("/api/qa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+      document.getElementById("response").innerText = data.answer || JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
