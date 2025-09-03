@@ -1,1 +1,55 @@
+from pathlib import Path
+
+# Recreate index.html with full UI for resend
+index_html_content = """
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI聖書案内人 マクロス – Q&Aログイン</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_aXFKZyg",
+      authDomain: "chcmw-ai-auth.firebaseapp.com",
+      projectId: "chcmw-ai-auth",
+      storageBucket: "chcmw-ai-auth.firebasestorage.app",
+      messagingSenderId: "946444103229",
+      appId: "1:946444103229:web:9534ed3feec50b3c844454"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div id="auth-section">
+      <h2>ログインしてマクロスに質問</h2>
+      <input type="email" id="email" placeholder="メールアドレス" />
+      <input type="password" id="password" placeholder="パスワード" />
+      <button onclick="signIn()">ログイン</button>
+      <button onclick="signUp()">新規登録</button>
+      <p id="authMessage"></p>
+    </div>
+
+    <div id="chat-section" style="display:none;">
+      <h1>AI聖書案内人 マクロス – Q&A</h1>
+      <p id="userEmail"></p>
+      <textarea id="userInput" placeholder="ここに質問を入力してください…"></textarea>
+      <button onclick="askQuestion()">送信</button>
+      <div id="responseBox"></div>
+      <button onclick="signOut()">ログアウト</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+"""
+
+# Save file
+index_path = Path("/mnt/data/index.html")
+index_path.write_text(index_html_content)
+index_path
 
