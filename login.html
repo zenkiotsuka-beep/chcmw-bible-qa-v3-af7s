@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login to Ask Macros Sensei</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      sendEmailVerification, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_",
+      authDomain: "chcmw-ai-auth.firebaseapp.com",
+      projectId: "chcmw-ai-auth",
+      storageBucket: "chcmw-ai-auth.appspot.com",
+      messagingSenderId: "946444103229",
+      appId: "1:946444103229:web:9534ed3feec50b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("signup").addEventListener("click", () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          sendEmailVerification(userCredential.user)
+            .then(() => alert("📩 Verification email sent. Please check your inbox."))
+            .catch((error) => alert("Failed to send verification: " + error.message));
+        })
+        .catch((error) => alert("Signup error: " + error.message));
+    });
+
+    document.getElementById("signin").addEventListener("click", () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          if (user.emailVerified) {
+            window.location.href = "https://chcmw.org/macros-qa";
+          } else {
+            alert("❗ Please verify your email before continuing.");
+          }
+        })
+        .catch((error) => alert("Signin error: " + error.message));
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      const status = document.getElementById("status");
+      if (user && user.emailVerified) {
+        status.textContent = "✅ Logged in as: " + user.email;
+      } else {
+        status.textContent = "🔒 Not logged in.";
+      }
+    });
+  </script>
+</head>
+<body>
+  <h2>Login to Ask Macros Sensei</h2>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Password"><br><br>
+  <button id="signup">Sign Up</button>
+  <button id="signin">Sign In</button>
+  <p id="status">🔒 Not logged in.</p>
+</body>
+</html>
