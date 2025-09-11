@@ -17,51 +17,58 @@
 
   <p id="status"></p>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <!-- Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <script>
-    // 🚨 Replace these placeholders with your real Firebase config
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_aXFKZyg",
-        authDomain: "chcmw-ai-auth.firebaseapp.com",
-        projectId: "chcmw-ai-auth",
-        storageBucket: "chcmw-ai-auth.firebasestorage.app",
-        messagingSenderId: "946444103229",
-        appId: "1:946444103229:web:9534ed3feec50b3c844454"
-        };
+    // ✅ Correct Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_aXFKZyg",
+      authDomain: "chcmw-ai-auth.firebaseapp.com",
+      projectId: "chcmw-ai-auth",
+      storageBucket: "chcmw-ai-auth.appspot.com",   // fixed value
+      messagingSenderId: "946444103229",
+      appId: "1:946444103229:web:9534ed3feec50b3c844454"
+    };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-    // Sign Up
-    function signUp() {
+    // Signup function
+    window.signUp = function() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password)
+
+      createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          document.getElementById("status").innerText = "✅ Signup successful: " + userCredential.user.email;
+          document.getElementById("status").innerText = 
+            "✅ Signup successful: " + userCredential.user.email;
         })
         .catch((error) => {
           document.getElementById("status").innerText = "❌ Error: " + error.message;
         });
-    }
+    };
 
-    // Sign In
-    function signIn() {
+    // Signin function
+    window.signIn = function() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
+
+      signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          document.getElementById("status").innerText = "✅ Signed in: " + userCredential.user.email;
+          document.getElementById("status").innerText = 
+            "✅ Signed in: " + userCredential.user.email;
         })
         .catch((error) => {
           document.getElementById("status").innerText = "❌ Error: " + error.message;
         });
-    }
+    };
   </script>
 </body>
 </html>
