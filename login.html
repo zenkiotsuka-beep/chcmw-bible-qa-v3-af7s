@@ -43,7 +43,6 @@
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // ✅ Correct Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_aXFKZyg",
       authDomain: "chcmw-ai-auth.firebaseapp.com",
@@ -105,10 +104,11 @@
         });
     };
 
-    // Submit question (placeholder)
+    // Submit placeholder
     window.submitQuestion = function() {
       const q = document.getElementById("question").value;
-      document.getElementById("answer").innerText = "📖 Your question was: " + q + "\n\n(Macros AI answer will go here)";
+      document.getElementById("answer").innerText = 
+        "📖 Your question was: " + q + "\n\n(Macros AI answer will go here)";
     };
   </script>
 </body>
