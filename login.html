@@ -1,115 +1,24 @@
+// Submit question → call backend
+window.submitQuestion = async function() {
+  const q = document.getElementById("question").value;
+  document.getElementById("answer").innerText = "⏳ Thinking...";
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ask Macros - Bible Q&A</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #qa-box { display: none; margin-top: 20px; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-    button { margin: 5px; padding: 8px 12px; }
-  </style>
-</head>
-<body>
-  <h2>Login to Ask Macros</h2>
-
-  <input type="email" id="email" placeholder="Email"><br><br>
-  <input type="password" id="password" placeholder="Password"><br><br>
-
-  <button onclick="signUp()">Sign Up</button>
-  <button onclick="signIn()">Sign In</button>
-
-  <p id="status"></p>
-
-  <!-- Q&A Section (hidden until login) -->
-  <div id="qa-box">
-    <h3>Ask Your Bible Question</h3>
-    <textarea id="question" placeholder="Type your Bible question here..."></textarea><br>
-    <button onclick="submitQuestion()">Submit</button>
-    <button onclick="signOut()">Sign Out</button>
-    <p id="answer"></p>
-  </div>
-
-  <!-- Firebase Modular SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      signOut as firebaseSignOut, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD-mjDdJYLKcci6E_s6-WlS1dc_aXFKZyg",
-      authDomain: "chcmw-ai-auth.firebaseapp.com",
-      projectId: "chcmw-ai-auth",
-      storageBucket: "chcmw-ai-auth.appspot.com",
-      messagingSenderId: "946444103229",
-      appId: "1:946444103229:web:9534ed3feec50b3c844454"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Monitor login state
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("status").innerText = "✅ Logged in as: " + user.email;
-        document.getElementById("qa-box").style.display = "block";
-      } else {
-        document.getElementById("status").innerText = "Not logged in.";
-        document.getElementById("qa-box").style.display = "none";
-      }
+  try {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q }),
     });
 
-    // Signup
-    window.signUp = function() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          document.getElementById("status").innerText = "✅ Signup successful: " + userCredential.user.email;
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = "❌ Error: " + error.message;
-        });
-    };
+    const data = await response.json();
 
-    // Signin
-    window.signIn = function() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          document.getElementById("status").innerText = "✅ Signed in: " + userCredential.user.email;
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = "❌ Error: " + error.message;
-        });
-    };
-
-    // Signout
-    window.signOut = function() {
-      firebaseSignOut(auth)
-        .then(() => {
-          document.getElementById("status").innerText = "👋 Signed out.";
-          document.getElementById("qa-box").style.display = "none";
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = "❌ Error: " + error.message;
-        });
-    };
-
-    // Submit placeholder
-    window.submitQuestion = function() {
-      const q = document.getElementById("question").value;
-      document.getElementById("answer").innerText = 
-        "📖 Your question was: " + q + "\n\n(Macros AI answer will go here)";
-    };
-  </script>
-</body>
-</html>
+    if (data.answer) {
+      document.getElementById("answer").innerText = "📖 " + data.answer;
+    } else {
+      document.getElementById("answer").innerText = "❌ Error: " + data.error;
+    }
+  } catch (err) {
+    document.getElementById("answer").innerText =
+      "❌ Error connecting to server.";
+  }
+};
