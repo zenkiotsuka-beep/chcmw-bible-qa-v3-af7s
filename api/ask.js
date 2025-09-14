@@ -92,8 +92,11 @@ export default async function handler(req, res) {
     const isJapanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(question);
 
     const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// ✅ Debug log
+console.log("DEBUG: OPENAI_API_KEY present?", !!process.env.OPENAI_API_KEY);
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
