@@ -76,18 +76,32 @@ const systemPromptJP = `
 宗派的争いや推測的教義を避けつつ、孤立したクリスチャンを害から守ることを忘れてはいけません。
 `;
 
-
-// api/ask.js
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
-    if (req.method !== "POST") {
-      return res
-        .status(405)
-        .json({ error: "Method not allowed. Please use POST." });
+    const { question } = req.body;
+
+    if (!question) {
+      return res.status(400).json({ error: "No question provided" });
     }
 
-    // Log incoming request body for debugging
-    console.log("DEBUG: Incoming body:", req.body);
+    // Instead of calling OpenAI, just return a simple test response
+    console.log("DEBUG: Minimal test function triggered");
+
+    return res.status(200).json({
+      answer: "Hello from Macros Sensei",
+      received: req.body
+    });
+  } catch (error) {
+    console.error("DEBUG: Unexpected Error:", error);
+    return res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+}
+
+
 
     // Just return a simple message
     return res.status(200).json({
