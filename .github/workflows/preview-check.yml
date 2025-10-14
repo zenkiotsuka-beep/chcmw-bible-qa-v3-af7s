@@ -1,0 +1,44 @@
+name: Preview Deploy Checker
+
+on:
+  deployment_status:
+
+jobs:
+  check-preview:
+    name: Verify preview login.html
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      contains(github.event.deployment.environment, 'Preview')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determine preview URL
+        id: url
+        run: |
+          URL="${{ github.event.deployment_status.target_url }}"
+          URL="${URL%/}"
+          echo "url=${URL}/login.html" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for page to be ready (HTTP 200 + marker present)
+        run: |
+          set -euo pipefail
+          TARGET="${{ steps.url.outputs.url }}"
+          echo "Checking: $TARGET"
+
+          for i in $(seq 1 24); do
+            HTTP=$(curl -sSL -o page.html -w "%{http_code}" "$TARGET" || true)
+            if [ "$HTTP" = "200" ]; then
+              if grep -q 'id="qa-ready"' page.html; then
+                echo "✅ Page is ready and marker found."
+                exit 0
+              fi
+              echo "200 OK but marker not found yet… retrying ($i/24)"
+            else
+              echo "HTTP $HTTP… retrying ($i/24)"
+            fi
+            sleep 5
+          done
+
+          echo "❌ login.html did not become ready in time."
+          tail -n 40 page.html || true
+          exit 1
