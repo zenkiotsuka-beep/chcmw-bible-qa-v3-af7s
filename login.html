@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHCMW — Bible Q&A</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 24px; }
+    .card { max-width: 720px; margin: 0 auto; padding: 24px; border: 1px solid #ddd; border-radius: 12px; }
+    h1 { margin-top: 0; }
+    textarea { width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
+    button { margin-top: 12px; padding: 10px 16px; border: 0; border-radius: 10px; cursor: pointer; }
+    .answer { margin-top: 16px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Ask Macros Sensei (Bible Q&A)</h1>
+    <p>Type your question below and press “Ask”.</p>
+
+    <label for="question" style="display:block;margin-bottom:6px;">Your question</label>
+    <textarea id="question" placeholder="e.g., What does Romans 8:9–10 mean about the Spirit of God?"></textarea>
+
+    <button id="askBtn" onclick="submitQuestion()">Ask</button>
+
+    <div id="answer" class="answer"></div>
+  </div>
+
+  <script>
+  // Submit question → call backend
+  window.submitQuestion = async function() {
+    const q = document.getElementById("question").value;
+    const answerEl = document.getElementById("answer");
+    answerEl.innerText = "⏳ Thinking...";
+
+    try {
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q }),
+      });
+
+      const data = await response.json();
+
+      if (data.answer) {
+        answerEl.innerText = "📖 " + data.answer;
+      } else {
+        answerEl.innerText = "❌ Error: " + (data.error || "Unknown error.");
+      }
+    } catch (err) {
+      answerEl.innerText = "❌ Error connecting to server.";
+    }
+  };
+  </script>
+</body>
+</html>
 
