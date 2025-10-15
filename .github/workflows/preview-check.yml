@@ -42,3 +42,4 @@ jobs:
           echo "❌ login.html did not become ready in time."
           tail -n 40 page.html || true
           exit 1
+          
