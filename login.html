@@ -3,54 +3,195 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CHCMW — Bible Q&A</title>
+  <title>Bible Guide Macros — Q&A</title>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 24px; }
-    .card { max-width: 720px; margin: 0 auto; padding: 24px; border: 1px solid #ddd; border-radius: 12px; }
-    h1 { margin-top: 0; }
-    textarea { width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; }
-    button { margin-top: 12px; padding: 10px 16px; border: 0; border-radius: 10px; cursor: pointer; }
-    .answer { margin-top: 16px; white-space: pre-wrap; }
+    :root { --fg:#222; --muted:#666; --bg:#fff; --card:#f7f7f8; --brand:#2a6; }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .wrap { max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,.03); }
+    h1 { margin:0 0 8px; font-weight:700; font-size:1.6rem; }
+    .sub { color:var(--muted); margin:0 0 20px; }
+    label { display:block; font-weight:600; margin:12px 0 6px; }
+    input, textarea { width:100%; padding:12px; border:1px solid #d0d7de; border-radius:10px; font:inherit; }
+    textarea { min-height:120px; resize:vertical; }
+    .row { display:flex; gap:12px; align-items:center; }
+    .btn { appearance:none; border:0; border-radius:12px; padding:10px 16px; cursor:pointer; font-weight:600; }
+    .btn-primary { background:var(--brand); color:#fff; }
+    .btn-ghost { background:#eef5f0; color:#0a4528; }
+    .muted { color:var(--muted); font-size:.92rem; }
+    .sep { height:1px; background:#eee; margin:20px 0; }
+    .right { text-align:right; }
+    .status { margin-top:10px; min-height:1.2em; }
+    .answer { white-space:pre-wrap; margin-top:12px; }
+    footer { margin-top:28px; text-align:center; color:#666; font-size:.9rem; }
+    .hidden { display:none; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Ask Macros Sensei (Bible Q&A)</h1>
-    <p>Type your question below and press “Ask”.</p>
+  <div class="wrap">
+    <div class="card">
+      <!-- BRAND-SAFE HEADING -->
+      <h1 id="app-title">Bible Guide Macros (Q&A)</h1>
+      <p class="sub">Please sign in with email to begin. Your questions remain private.</p>
 
-    <label for="question" style="display:block;margin-bottom:6px;">Your question</label>
-    <textarea id="question" placeholder="e.g., What does Romans 8:9–10 mean about the Spirit of God?"></textarea>
+      <!-- AUTH SECTION -->
+      <div id="auth-box">
+        <div class="row" role="tablist" aria-label="Choose authentication mode" style="margin-bottom:6px;">
+          <button class="btn btn-ghost" id="mode-signin" aria-selected="true">Sign In</button>
+          <button class="btn btn-ghost" id="mode-signup" aria-selected="false">Sign Up</button>
+        </div>
 
-    <button id="askBtn" onclick="submitQuestion()">Ask</button>
+        <label for="email">Email</label>
+        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.org" required />
 
-    <div id="answer" class="answer"></div>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+
+        <div class="row" style="justify-content:space-between; margin-top:12px;">
+          <div class="row">
+            <input id="remember" type="checkbox" aria-label="Remember me" />
+            <span class="muted">Remember me</span>
+          </div>
+          <div class="right">
+            <button id="auth-submit" class="btn btn-primary">Continue</button>
+          </div>
+        </div>
+        <div id="auth-status" class="status muted" aria-live="polite"></div>
+        <div class="sep"></div>
+      </div>
+
+      <!-- Q&A SECTION (appears after auth) -->
+      <div id="qa-box" class="hidden" aria-live="polite">
+        <label for="question">Type your question below and press “Ask”.</label>
+        <textarea id="question" placeholder="e.g., What does Romans 8:9–10 mean about the Spirit of God?"></textarea>
+        <div class="row" style="justify-content:space-between; margin-top:10px;">
+          <button id="askBtn" class="btn btn-primary">Ask</button>
+          <button id="signoutBtn" class="btn">Sign Out</button>
+        </div>
+        <div id="answer" class="answer"></div>
+      </div>
+
+      <!-- Blessing Line -->
+      <footer>
+        ✝️ © 2025 Christian House Church Mission of Washington — Serving through Faith, Wisdom &amp; Love.
+      </footer>
+    </div>
   </div>
 
+  <!-- readiness marker for your checker -->
+  <div id="qa-ready" data-app="chcmw-bible-qa" hidden>ready</div>
+
   <script>
-  // Submit question → call backend
-  window.submitQuestion = async function() {
-    const q = document.getElementById("question").value;
-    const answerEl = document.getElementById("answer");
-    answerEl.innerText = "⏳ Thinking...";
+    const $ = (id) => document.getElementById(id);
+    const authBox = $("auth-box");
+    const qaBox = $("qa-box");
+    const authStatus = $("auth-status");
+    const modeSignin = $("mode-signin");
+    const modeSignup = $("mode-signup");
+    const authBtn = $("auth-submit");
+    const askBtn = $("askBtn");
+    const signoutBtn = $("signoutBtn");
 
-    try {
-      const response = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q }),
-      });
+    let mode = "signin"; // or "signup"
+    let token = localStorage.getItem("chcmw_token") || "";
 
-      const data = await response.json();
-
-      if (data.answer) {
-        answerEl.innerText = "📖 " + data.answer;
-      } else {
-        answerEl.innerText = "❌ Error: " + (data.error || "Unknown error.");
-      }
-    } catch (err) {
-      answerEl.innerText = "❌ Error connecting to server.";
+    function setMode(next) {
+      mode = next;
+      modeSignin.setAttribute("aria-selected", mode === "signin");
+      modeSignup.setAttribute("aria-selected", mode === "signup");
+      authBtn.textContent = mode === "signin" ? "Sign In" : "Create Account";
+      authStatus.textContent = "";
     }
-  };
+
+    modeSignin.addEventListener("click", () => setMode("signin"));
+    modeSignup.addEventListener("click", () => setMode("signup"));
+
+    function setAuthed(state) {
+      if (state) {
+        authBox.classList.add("hidden");
+        qaBox.classList.remove("hidden");
+      } else {
+        authBox.classList.remove("hidden");
+        qaBox.classList.add("hidden");
+      }
+    }
+
+    async function authSubmit() {
+      authStatus.textContent = "⏳ Processing…";
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password) {
+        authStatus.textContent = "Please enter email and password.";
+        return;
+      }
+
+      try {
+        const endpoint = mode === "signin" ? "/api/auth/signin" : "/api/auth/signup";
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data?.ok || !data?.token) {
+          authStatus.textContent = "❌ " + (data?.error || "Authentication failed.");
+          return;
+        }
+
+        token = data.token;
+        if ($("remember").checked) {
+          localStorage.setItem("chcmw_token", token);
+        }
+        authStatus.textContent = "✅ Signed in.";
+        setAuthed(true);
+      } catch (e) {
+        authStatus.textContent = "❌ Network error. Please try again.";
+      }
+    }
+
+    async function submitQuestion() {
+      const q = $("question").value.trim();
+      const answerEl = $("answer");
+      if (!q) { answerEl.textContent = "Please enter a question."; return; }
+      answerEl.textContent = "⏳ Thinking…";
+
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": "Bearer " + token } : {})
+          },
+          body: JSON.stringify({ question: q })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.answer) {
+          answerEl.textContent = "📖 " + data.answer;
+        } else {
+          answerEl.textContent = "❌ " + (data?.error || "Unknown error.");
+        }
+      } catch (e) {
+        answerEl.textContent = "❌ Error connecting to server.";
+      }
+    }
+
+    function signOut() {
+      token = "";
+      localStorage.removeItem("chcmw_token");
+      $("question").value = "";
+      $("answer").textContent = "";
+      setAuthed(false);
+      authStatus.textContent = "You have signed out.";
+    }
+
+    authBtn.addEventListener("click", authSubmit);
+    askBtn.addEventListener("click", submitQuestion);
+    signoutBtn.addEventListener("click", signOut);
+
+    // Auto-show Q&A if token exists
+    if (token) setAuthed(true);
   </script>
 </body>
 </html>
